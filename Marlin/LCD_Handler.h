@@ -7,36 +7,36 @@
 
 #ifdef SIGMA_TOUCH_SCREEN
 
-#ifndef LCD_HANDLER_H_
-#define LCD_HANDLER_H_
+	#ifndef LCD_HANDLER_H_
+		#define LCD_HANDLER_H_
 
-//Rapduch
-#include "genieArduino.h"
-#include "Touch_Screen_Definitions.h"
-#include "Marlin.h"
-#include "Configuration.h"
-#include "stepper.h"
-#include "temperature.h"
-//#include "ultralcd.h"
+		//Rapduch
+		#include "genieArduino.h"
+		#include "Touch_Screen_Definitions.h"
+		#include "Marlin.h"
+		#include "Configuration.h"
+		#include "stepper.h"
+		#include "temperature.h"
+		//#include "ultralcd.h"
 
-extern bool cancel_heatup;
-void myGenieEventHandler();
-bool flag_filament_home= false;
-bool flag_pause = false;
-bool flag_resume = false;
-bool flag_full_calib = false;
-bool flag_bed_calib_done = false;
-int  print_setting_tool = 2;
-float offset_x_calib = 0;
-float offset_y_calib = 0;
-int  purge_extruder_selected = 0;
-int  previous_state = FORM_MAIN_SCREEN;
-int custom_insert_temp = 210;
-int custom_remove_temp = 210;
-int custom_print_temp = 210;
-int custom_bed_temp = 40;
+		extern bool cancel_heatup;
+		void myGenieEventHandler();
+		bool flag_filament_home= false;
+		bool flag_pause = false;
+		bool flag_resume = false;
+		bool flag_full_calib = false;
+		bool flag_bed_calib_done = false;
+		int  print_setting_tool = 2;
+		float offset_x_calib = 0;
+		float offset_y_calib = 0;
+		int  purge_extruder_selected = 0;
+		int  previous_state = FORM_MAIN_SCREEN;
+		int custom_insert_temp = 210;
+		int custom_remove_temp = 210;
+		int custom_print_temp = 210;
+		int custom_bed_temp = 40;
 
-int redo_source;
+		int redo_source;
 
 
 //Created by Jordi Calduch for RepRapBCN SIGMA 12/2014
@@ -1383,26 +1383,29 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 				{
 					is_on_printing_screen=true;
 					int count = 12;
-					char buffer[count];
-					if (String(card.longFilename).length()>count){
-						for (int i = 0; i<count ; i++)
+					char buffer[13];
+					if (String(card.longFilename).length()>12){
+						for (int i = 0; i<12 ; i++)
 						{
-							/*if (buffer[i] = '.') i = count +10;
-							else */buffer[i]=card.longFilename[i];
+							buffer[i]=card.longFilename[i];
 						}
-						buffer[count]='\0';
+						buffer[12]='\0';
 						char* buffer2 = strcat(buffer,"...\0");
+						Serial.print("Card Name: ");
+						Serial.println(card.longFilename);
+						Serial.print("Buffer1: ");
+						Serial.println(buffer);
+						Serial.print("buffer out: ");
+						Serial.println(buffer2);
 						genie.WriteStr(STRINGS_PRINTING_GCODE,buffer2);//Printing form
-					}else{
-						/*char* str;
-						str = strtok (buffer,".");*/
+						}else{
 						for (int i = 0; i<=String(card.longFilename).length(); i++)
 						{
-							/*if (buffer[i] = '.') i = String(card.longFilename).length() +10;
-							else */buffer[i]=card.longFilename[i];
+							if (buffer[i] == '.') i = String(card.longFilename).length() +10;
+							else buffer[i]=card.longFilename[i];
 						}
-						buffer[count]='\0';
-						genie.WriteStr(STRINGS_PRINTING_GCODE,buffer);//Printing form
+						//buffer[count]='\0';
+						genie.WriteStr(STRINGS_PRINTING_GCODE,buffer);//Printing form//Printing form
 					}
 					genie.WriteObject(GENIE_OBJ_FORM,FORM_PRINTING,1);
 				}
@@ -2806,53 +2809,29 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 					#ifdef SIGMA_TOUCH_SCREEN
 					genie.WriteObject(GENIE_OBJ_FORM,FORM_PRINTING,0);
 					char buffer[13];
-					if (String(card.longFilename).length()>12){
-						for (int i = 0; i<12 ; i++)
-						{
-							buffer[i]=card.longFilename[i];
-						}
-						buffer[12]='\0';
-						char* buffer2 = strcat(buffer,"...\0");
-						Serial.print("Card Name: ");
-						Serial.println(card.longFilename);
-						Serial.print("Buffer1: ");
-						Serial.println(buffer);
-						Serial.print("buffer out: ");
-						Serial.println(buffer2);
-						genie.WriteStr(STRINGS_PRINTING_GCODE,buffer2);//Printing form
+						if (String(card.longFilename).length()>12){
+							for (int i = 0; i<12 ; i++)
+							{
+								buffer[i]=card.longFilename[i];
+							}
+							buffer[12]='\0';
+							char* buffer2 = strcat(buffer,"...\0");
+							Serial.print("Card Name: ");
+							Serial.println(card.longFilename);
+							Serial.print("Buffer1: ");
+							Serial.println(buffer);
+							Serial.print("buffer out: ");
+							Serial.println(buffer2);
+							genie.WriteStr(STRINGS_PRINTING_GCODE,buffer2);//Printing form
 						}else{
-						for (int i = 0; i<=String(card.longFilename).length(); i++)
-						{
-							if (buffer[i] == '.') i = String(card.longFilename).length() +10;
-							else buffer[i]=card.longFilename[i];
+							for (int i = 0; i<=String(card.longFilename).length(); i++)
+							{
+								if (buffer[i] == '.') i = String(card.longFilename).length() +10;
+								else buffer[i]=card.longFilename[i];
+							}
+							//buffer[count]='\0';
+							genie.WriteStr(STRINGS_PRINTING_GCODE,buffer);//Printing form//Printing form
 						}
-						//buffer[count]='\0';
-						genie.WriteStr(STRINGS_PRINTING_GCODE,buffer);//Printing form//Printing form
-					}
-					
-					//Serial.println((char*)prepareString(card.longFilename,12));
-					//genie.WriteStr(6,"Ready");
-					#endif
-					/*enquecommand_P(PSTR("M24"));
-					int count = 12;
-					char buffer[count];
-					if (String(card.longFilename).length()>count){
-						for (int i = 0; i<count ; i++)
-						{
-							buffer[i]=card.longFilename[i];
-						}
-						buffer[count]='\0';
-						char* buffer2 = strcat(buffer,"...\0");
-						genie.WriteStr(STRINGS_PRINTING_GCODE,buffer2);//Printing form
-					}else{
-						for (int i = 0; i<=String(card.longFilename).length(); i++)
-						{
-							/*if (buffer[i] = '.') i = String(card.longFilename).length() +10;
-							else *//*buffer[i]=card.longFilename[i];
-						}
-						buffer[count]='\0';
-						genie.WriteStr(STRINGS_PRINTING_GCODE,buffer);//Printing form//Printing form
-					}*/
 				
 				//genie.WriteStr(2,card.longFilename);
 				//genie.WriteStr(6,"Printing...");
@@ -2949,5 +2928,5 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 
 
 	#endif /* INCLUDE */
-
+	#endif
 #endif

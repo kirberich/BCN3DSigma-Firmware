@@ -20,14 +20,14 @@
 ////////////////////////////////////			/////////
 
 #define FORM_SDFILES							2
-	#define STRING_NAME_FILE							1
-	#define BUTTON_SD_SELECTED							15
-	#define BUTTON_SD_LEFT								14
-	#define BUTTON_SD_RIGHT								5	
+	#define STRING_NAME_FILE				1
+	#define BUTTON_SD_SELECTED				15
+	#define BUTTON_SD_LEFT					14
+	#define BUTTON_SD_RIGHT					5
 #define FORM_REDO_X_CAB							3
-	#define BUTTON_REDO_LEFT_CAB						27
-	#define BUTTON_REDO_RIGHT_CAB						28
-	#define BUTTON_REDO_X_CAB							29
+	#define BUTTON_REDO_LEFT_CAB			27
+	#define BUTTON_REDO_RIGHT_CAB			28
+	#define BUTTON_REDO_X_CAB				29
 #define FORM_UTILITIES							4	
 #define FORM_MAIN_SCREEN						5	
 #define FORM_FILAMENT							6
