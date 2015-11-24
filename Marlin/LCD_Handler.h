@@ -1848,7 +1848,7 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 				else if (Event.reportObject.index == BUTTON_REDO_X_CAB)
 				{
 					redo_source = 1;
-					genie.WriteObject(GENIE_OBJ_FORM,FORM_FULL_CAL,0);
+					genie.WriteObject(GENIE_OBJ_FORM,FORM_CLEAN_BED,0);
 										
 				}
 				
