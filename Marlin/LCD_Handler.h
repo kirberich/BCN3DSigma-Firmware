@@ -634,19 +634,19 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 				}
 				//***MOVING
 				else if(Event.reportObject.index == BUTTON_PURGE_RETRACK){
-					if(degHotend(purge_extruder_selected) >= target_temperature[purge_extruder_selected]-5){
+					if(degHotend(purge_extruder_selected) >= target_temperature[purge_extruder_selected]-10){
 						current_position[E_AXIS]-=3;
 						plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], INSERT_SLOW_SPEED/60, purge_extruder_selected);//Retrack	
 					}
 				}
 				else if(Event.reportObject.index == BUTTON_PURGE_INSERT){
-					if(degHotend(purge_extruder_selected) >= target_temperature[purge_extruder_selected]-5){
+					if(degHotend(purge_extruder_selected) >= target_temperature[purge_extruder_selected]-10){
 						current_position[E_AXIS]+=3;
 						plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], INSERT_SLOW_SPEED/60, purge_extruder_selected);//Purge	
 					}
 				}
 				else if(Event.reportObject.index == BUTTON_PURGE_INSERTX3){
-					if(degHotend(purge_extruder_selected) >= target_temperature[purge_extruder_selected]-5){
+					if(degHotend(purge_extruder_selected) >= target_temperature[purge_extruder_selected]-10){
 						current_position[E_AXIS]+=15;
 						plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], INSERT_SLOW_SPEED/60, purge_extruder_selected);//Purge
 					}
