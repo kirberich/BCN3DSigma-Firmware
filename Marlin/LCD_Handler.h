@@ -23,6 +23,7 @@
 		void myGenieEventHandler();
 		bool flag_filament_home= false;
 		bool flag_pause = false;
+		bool flag_change_filament = false;
 		bool flag_resume = false;
 		bool flag_full_calib = false;
 		bool flag_bed_calib_done = false;
@@ -231,15 +232,14 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 					int value = genie.GetEventData(&Event);
 					if (value == 1) // Need to pause
 					{
-						////I believe it is a really unsafe way to do it
-						////plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]+20, current_position[E_AXIS], homing_feedrate[Z_AXIS]/60, RIGHT_EXTRUDER);
-						////st_synchronize();
 						card.pauseSDPrint();
 						Serial.println("PAUSE!");
-						flag_pause = true;
-					}
-					
+						flag_pause = true;		
+										
+					}					
 				}
+				
+				
 				
 				//*****Printing Settings*****
 				#pragma region Printing Settings
@@ -352,14 +352,25 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 					//I believe it is a really unsafe way to do it
 					//plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]-20, current_position[E_AXIS], homing_feedrate[Z_AXIS]/60, RIGHT_EXTRUDER);
 					//st_synchronize();
-					card.startFileprint();
-					Serial.println("RESUME!");
-					flag_resume = true;
-					if(flag_resume){
-						enquecommand_P(((PSTR("G70"))));
-						flag_resume = false;
-						Serial.println("resume detected");
+					int value = genie.GetEventData(&Event);
+					if (value == 0) // Need to pause
+					{
+						card.startFileprint();
+						Serial.println("RESUME!");						
+						flag_resume = true;
+						if(flag_resume){
+							enquecommand_P(((PSTR("G70"))));
+							st_synchronize();							
+							Serial.println("resume detected");
+						}
 					}
+				}
+				
+				else if(Event.reportObject.index == BUTTON_CHANGE_FILAMENT){
+					flag_change_filament = true;
+					surfing_utilities = true;
+					Serial.println("Change filament mode");
+					genie.WriteObject(GENIE_OBJ_FORM,FORM_SELECT_EXTRUDER,0);
 				}
 				
 				else if (Event.reportObject.index == BUTTON_CHANGE_EXTRUDER)
@@ -871,12 +882,14 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 						which_extruder=1;
 					}
 					
-					
+					if(flag_change_filament){
+						filament_mode = 'R';
+					}				
+						
 					if (filament_mode == 'I') {
 						if (which_extruder == 0)	genie.WriteObject(GENIE_OBJ_FORM,FORM_LEFT_MATERIAL,0);
 						else genie.WriteObject(GENIE_OBJ_FORM,FORM_RIGHT_MATERIAL,0);
-					}
-					
+					}					
 					else {
 						//*********Move the bed down and the extruders inside
 						processing = true;
@@ -1628,12 +1641,25 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 				
 				else if (Event.reportObject.index == BUTTON_SUCCESS_FILAMENT_OK)
 				{
-					//enquecommand_P((PSTR("G28 X0 Y0")));
-					enquecommand_P((PSTR("T0")));
-					Serial.println("Filament Inserted/Removed, returning to Main Menu");
-					genie.WriteObject(GENIE_OBJ_FORM,FORM_FILAMENT,0);
-					setTargetHotend0(0);
-					setTargetHotend1(0);
+					if(flag_change_filament){
+						if (filament_mode == 'R'){
+							filament_mode = 'I';
+							if (which_extruder == 0)	genie.WriteObject(GENIE_OBJ_FORM,FORM_LEFT_MATERIAL,0);
+							else genie.WriteObject(GENIE_OBJ_FORM,FORM_RIGHT_MATERIAL,0);
+						}
+						else{
+							flag_change_filament = false;
+							changeTool(saved_hotend);
+							genie.WriteObject(GENIE_OBJ_FORM,FORM_PRINTING,0);
+						}
+					}else{
+						//enquecommand_P((PSTR("G28 X0 Y0")));
+						enquecommand_P((PSTR("T0")));
+						Serial.println("Filament Inserted/Removed, returning to Main Menu");
+						genie.WriteObject(GENIE_OBJ_FORM,FORM_FILAMENT,0);
+						setTargetHotend0(0);
+						setTargetHotend1(0);
+					}
 				}
 				#pragma endregion SuccessScreens
 				

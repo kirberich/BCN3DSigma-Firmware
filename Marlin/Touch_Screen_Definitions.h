@@ -68,6 +68,7 @@
 	#define STRING_PRINTING_BED				9
 	#define BUTTON_PRINT_SETTINGS			16
 	#define BUTTON_PAUSE_RESUME				18
+	#define BUTTON_CHANGE_FILAMENT			37
  
 #define FORM_CLEAN_BED								10
 	#define	BUTTON_CLEAN_BED				71

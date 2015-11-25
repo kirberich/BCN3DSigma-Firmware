@@ -827,10 +827,7 @@ static float analog2temp(int raw, uint8_t e) {
     {
       if (PGM_RD_W((*tt)[i][0]) > raw)
       {
-        celsius = PGM_RD_W((*tt)[i-1][1]) + 
-          (raw - PGM_RD_W((*tt)[i-1][0])) * 
-          (float)(PGM_RD_W((*tt)[i][1]) - PGM_RD_W((*tt)[i-1][1])) /
-          (float)(PGM_RD_W((*tt)[i][0]) - PGM_RD_W((*tt)[i-1][0]));
+        celsius = PGM_RD_W((*tt)[i-1][1]) + (raw - PGM_RD_W((*tt)[i-1][0])) * (float)(PGM_RD_W((*tt)[i][1]) - PGM_RD_W((*tt)[i-1][1])) / (float)(PGM_RD_W((*tt)[i][0]) - PGM_RD_W((*tt)[i-1][0]));
         break;
       }
     }

@@ -299,6 +299,8 @@ float volumetric_multiplier[EXTRUDERS] = {1.0
 };
 float	current_position[NUM_AXIS] = { 0.0, 0.0, 0.0, 0.0 };
 float	saved_position[NUM_AXIS] = {0.0,0.0,0.0,0.0}; //Xavi -> array to save the current position to make a pause
+int		saved_temp[3] = {0,0,0}; //Xavi -> arra to save the current position to make a pause
+int		saved_hotend = 0;
 
 float add_homing[3]={0,0,0};
 #ifdef DELTA
@@ -947,14 +949,14 @@ void touchscreen_update() //Updates the Serial Communications with the screen
 				Serial.println("Ready to Insert/Remove");
 				//We have preheated correctly
 				if (filament_mode =='I'){		
-					heatting = false;								
+												
 					genie.WriteStr(STRING_FILAMENT,"Press GO and keep pushing the filament \n until starts being pulled");
 					genie.WriteObject(GENIE_OBJ_FORM,FORM_INSERT_FIL,0);
 					genie.WriteStr(STRING_FILAMENT,"Press GO and keep pushing the filament \n until starts being pulled");
 				}
 				else if (filament_mode =='R')
 				{
-					heatting = false;	
+						
 					genie.WriteStr(STRING_FILAMENT,"Press GO to Remove Filament, roll\n the spool backwards to save the filament");
 					genie.WriteObject(GENIE_OBJ_FORM,FORM_REMOVE_FIL,0);
 					genie.WriteStr(STRING_FILAMENT,"Press GO to Remove Filament, roll\n the spool backwards to save the filament");
@@ -962,7 +964,7 @@ void touchscreen_update() //Updates the Serial Communications with the screen
 				}
 				else
 				{
-					heatting = false;	
+						
 					genie.WriteStr(STRING_FILAMENT,"Press GO to Purge Filament"); 
 					genie.WriteObject(GENIE_OBJ_FORM,FORM_PURGE_FIL,0);
 				}
@@ -1118,8 +1120,7 @@ void get_command()
 			enquecommand_P(((PSTR("G69"))));
 			flag_pause = false;
 			Serial.println("pause detected");
-		}
-		
+		}		
 		//****************************************************/
 		
 		#endif
@@ -3513,7 +3514,10 @@ void process_commands()
 					saved_position[X_AXIS] = current_position[X_AXIS];
 					saved_position[Y_AXIS] = current_position[Y_AXIS];
 					saved_position[Z_AXIS] = current_position[Z_AXIS];
-					
+					saved_temp[LEFT_EXTRUDER] = target_temperature[LEFT_EXTRUDER];
+					saved_temp[RIGHT_EXTRUDER] = target_temperature[RIGHT_EXTRUDER];
+					saved_temp[2] = target_temperature_bed;
+					saved_hotend = active_extruder;
 					//*********************************//
 					
 					//********RETRACK
@@ -3544,32 +3548,47 @@ void process_commands()
 					}
 					st_synchronize();
 					//*********************************//
-					flag_pause = false;
+					//flag_pause = false;
 					break;
 					}
 					
 					case 70: //G70 resume
 					Serial.println("G70 ACTIVATED");
-					////*******LOAD ACTUIAL POSITION
-					current_position[Y_AXIS] = saved_position[Y_AXIS];
-					//Serial.println(current_position[Z_AXIS]);
-					//*********************************//
 					
+					active_extruder = saved_hotend;
+					changeTool(active_extruder);	
+									
+					//*************LOAD TEMPS
+					target_temperature[LEFT_EXTRUDER] = saved_temp[LEFT_EXTRUDER];
+					target_temperature[RIGHT_EXTRUDER] = saved_temp[RIGHT_EXTRUDER];
+					target_temperature_bed = saved_temp[2];
+					//**************************************************************//
+										
 					//********MOVE TO ORIGINAL POSITION Z
 					//if(current_position[Z_AXIS]>=extruder_offset[Z_AXIS]) += 20;
-					current_position[Z_AXIS] = saved_position[Z_AXIS];
-					feedrate=homing_feedrate[Z_AXIS];
-					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
+					current_position[Z_AXIS] = saved_position[Z_AXIS];					
+					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[Z_AXIS], active_extruder);
+					st_synchronize();
+					//*********************************//
+					
+					////*******LOAD ACTUIAL POSITION Y
+					current_position[Y_AXIS] = saved_position[Y_AXIS];
+					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Y_AXIS]/60, active_extruder);
 					st_synchronize();
 					//*********************************//
 					
 					
+					//************HEAT TO SAVED TEMPS					
+					while (degHotend(LEFT_EXTRUDER)<(degTargetHotend(LEFT_EXTRUDER)-5) && degHotend(RIGHT_EXTRUDER)<(degTargetHotend(RIGHT_EXTRUDER)-5) && (degBed()< target_temperature_bed -5)){ //Waiting to heat the extruder
+							
+						manage_heater();
+					}					
+					//*****************************************
+					
 					////******PURGE   -->> Purge to clean the extruder, retrack to avoid the trickle
-					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS] += 1.2, 400, active_extruder);
-					st_synchronize();
-					delay(300);
-					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS] -= 4, 2400, active_extruder);
-					st_synchronize();
+					/*current_position[E_AXIS] += 4;
+					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], INSERT_SLOW_SPEED, active_extruder);
+					st_synchronize();	*/
 					//*********************************//
 					
 					//********MOVE TO ORIGINAL POSITION X
