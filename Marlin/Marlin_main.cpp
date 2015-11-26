@@ -689,11 +689,11 @@ void setup()
 				Config_RetrieveSettings();
 				//*************BLOCK MOVES***********
 				Serial.println("block motors");
-				int asdf = millis();
-				while(asdf > 100000){
+				int asdf = millis()+30000;
+				while(millis() < asdf){
 					enable_x();
 					enable_y();
-					enable_z();		
+					enable_z();							
 				}
 				Serial.println("move motors");
 				
