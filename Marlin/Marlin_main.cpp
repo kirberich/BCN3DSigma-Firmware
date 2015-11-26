@@ -687,6 +687,17 @@ void setup()
 				genie.WriteObject(GENIE_OBJ_FORM,FORM_MAIN_SCREEN,0);
 				// loads data from EEPROM if available else uses defaults (and resets step acceleration rate)
 				Config_RetrieveSettings();
+				//*************BLOCK MOVES***********
+				Serial.println("block motors");
+				int asdf = millis();
+				while(asdf > 100000){
+					enable_x();
+					enable_y();
+					enable_z();		
+				}
+				Serial.println("move motors");
+				
+				//****************
 			//}
 			//Turn the Display on (Contrast) - (Not needed but illustrates how)
 			/*for(int i = 0;i<16;i++){				
@@ -3521,34 +3532,30 @@ void process_commands()
 					//*********************************//
 					
 					//********RETRACK
-					current_position[E_AXIS]-=2;
-					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], 50, active_extruder);//Retrack
+					current_position[E_AXIS]-=4;
+					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], INSERT_FAST_SPEED/60, active_extruder);//Retrack
 					st_synchronize();
 					//*********************************//
 					
-					//********MOVE TO PAUSE POSITION
-					
+					//********MOVE TO PAUSE POSITION					
 					if(current_position[Z_AXIS]>=180) current_position[Z_AXIS] += 2;								//
 					else if(current_position[Z_AXIS]>=205) {}														//Move the bed, more or less in function of current_position
 					else current_position[Z_AXIS] += 20;															//
 					int feedrate=homing_feedrate[Z_AXIS];
 					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
-					st_synchronize();
+					st_synchronize();			
 					
-					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS] -= 4, 400, active_extruder);	//Retrack
-					st_synchronize();
 					
 					feedrate=homing_feedrate[X_AXIS];
 					if (active_extruder == LEFT_EXTRUDER){															//Move X axis, controlling the current_extruder
-					current_position[X_AXIS] = 0;
-					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
+						current_position[X_AXIS] = 0;
+						plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
 					}else{
-					current_position[X_AXIS] = extruder_offset[X_AXIS][1];
-					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
+						current_position[X_AXIS] = extruder_offset[X_AXIS][1];
+						plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
 					}
 					st_synchronize();
-					//*********************************//
-					//flag_pause = false;
+					//*********************************//					
 					break;
 					}
 					
@@ -3897,7 +3904,7 @@ void process_commands()
 					}
 					break;
 					#endif
-					case 17:
+					case 17: //M17
 						LCD_MESSAGEPGM(MSG_NO_MOVE);
 						enable_x();
 						enable_y();
@@ -4696,36 +4703,32 @@ void process_commands()
 					break;
 					case 18: //compatibility
 					case 84: // M84
-					if(code_seen('S')){
-					stepper_inactive_time = code_value() * 1000;
-					}
-					else
-					{
-					bool all_axis = !((code_seen(axis_codes[X_AXIS])) || (code_seen(axis_codes[Y_AXIS])) || (code_seen(axis_codes[Z_AXIS]))|| (code_seen(axis_codes[E_AXIS])));
-					if(all_axis)
-					{
-					st_synchronize();
-					disable_e0();
-					disable_e1();
-					disable_e2();
-					finishAndDisableSteppers();
-					}
-					else
-					{
-					st_synchronize();
-					if(code_seen('X')) disable_x();
-					if(code_seen('Y')) disable_y();
-					if(code_seen('Z')) disable_z();
-					#if ((E0_ENABLE_PIN != X_ENABLE_PIN) && (E1_ENABLE_PIN != Y_ENABLE_PIN)) // Only enable on boards that have seperate ENABLE_PINS
-					if(code_seen('E')) {
-					disable_e0();
-					disable_e1();
-					disable_e2();
-					}
-					#endif
-					}
-					}
-					break;
+						if(code_seen('S')){
+							stepper_inactive_time = code_value() * 1000;
+						}else{
+							bool all_axis = !((code_seen(axis_codes[X_AXIS])) || (code_seen(axis_codes[Y_AXIS])) || (code_seen(axis_codes[Z_AXIS]))|| (code_seen(axis_codes[E_AXIS])));
+							if(all_axis){
+								st_synchronize();
+								disable_e0();
+								disable_e1();
+								disable_e2();
+								finishAndDisableSteppers();
+							}
+							else{
+								st_synchronize();
+								if(code_seen('X')) disable_x();
+								if(code_seen('Y')) disable_y();
+								if(code_seen('Z')) disable_z();
+								#if ((E0_ENABLE_PIN != X_ENABLE_PIN) && (E1_ENABLE_PIN != Y_ENABLE_PIN)) // Only enable on boards that have seperate ENABLE_PINS
+								if(code_seen('E')) {
+									disable_e0();
+									disable_e1();
+									disable_e2();
+								}
+							#endif
+							}
+						}
+						break;
 					case 85: // M85
 					if(code_seen('S')) {
 					max_inactive_time = code_value() * 1000;
