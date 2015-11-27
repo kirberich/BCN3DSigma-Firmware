@@ -276,6 +276,7 @@ Rapduch
 #pragma endregion temperatures
 
 bool home_made = false;
+bool dobloking = false;
 float homing_feedrate[] = HOMING_FEEDRATE;
 bool axis_relative_modes[] = AXIS_RELATIVE_MODES;
 int feedmultiply=100; //100->1 200->2
@@ -687,17 +688,8 @@ void setup()
 				genie.WriteObject(GENIE_OBJ_FORM,FORM_MAIN_SCREEN,0);
 				// loads data from EEPROM if available else uses defaults (and resets step acceleration rate)
 				Config_RetrieveSettings();
-				//*************BLOCK MOVES***********
-				Serial.println("block motors");
-				int asdf = millis()+30000;
-				while(millis() < asdf){
-					enable_x();
-					enable_y();
-					enable_z();							
-				}
-				Serial.println("move motors");
 				
-				//****************
+				
 			//}
 			//Turn the Display on (Contrast) - (Not needed but illustrates how)
 			/*for(int i = 0;i<16;i++){				
@@ -786,11 +778,22 @@ void setup()
 	//enquecommand(cmd);
 	//enquecommand_P(PSTR("M24"));
 	#endif
+	
+	//*************BLOCK MOVES***********
+	//Serial.println("block motors");	
+	//do { 
+	//	WRITE(X_ENABLE_PIN, X_ENABLE_ON);
+	//	WRITE(X2_ENABLE_PIN, X_ENABLE_ON);
+	//	};
+    //while (0);
+	//Serial.println("move motors");				
+	//**********************************
 }
 
 
 void loop()
 {
+	
 	if(buflen < (BUFSIZE-1))
 	get_command();
 	#ifdef SDSUPPORT
@@ -3154,11 +3157,11 @@ void process_commands()
 				
 				Serial.print("Zvalue after home:");
 				Serial.println(current_position[Z_AXIS]);
-				
+				dobloking= true;
 				float z_at_pt_1 = probe_pt(X_SIGMA_PROBE_1_LEFT_EXTR,Y_SIGMA_PROBE_1_LEFT_EXTR, Z_RAISE_BEFORE_PROBING);
 				float z_at_pt_2 = probe_pt(X_SIGMA_PROBE_2_LEFT_EXTR,Y_SIGMA_PROBE_2_LEFT_EXTR, current_position[Z_AXIS] + (Z_RAISE_BETWEEN_PROBINGS/2));
 				float z_at_pt_3 = probe_pt(X_SIGMA_PROBE_3_LEFT_EXTR,Y_SIGMA_PROBE_3_LEFT_EXTR, current_position[Z_AXIS] + (Z_RAISE_BETWEEN_PROBINGS/2));
-				
+				dobloking= false;
 				//feedrate=homing_feedrate[X_AXIS];
 				feedrate = XY_TRAVEL_SPEED;
 				current_position[X_AXIS]=x_home_pos(active_extruder)+8; current_position[Z_AXIS]+= 3;
@@ -3921,13 +3924,10 @@ void process_commands()
 					SERIAL_PROTOCOLLNPGM(MSG_END_FILE_LIST);
 					break;
 					case 21: // M21 - init SD card
-
-					card.initsd();
-
+						card.initsd();
 					break;
 					case 22: //M22 - release SD card
-					card.release();
-
+						card.release();
 					break;
 					case 23: //M23 - Select file
 						starpos = (strchr(strchr_pointer + 4,'*'));
@@ -3939,34 +3939,34 @@ void process_commands()
 						starttime=millis();
 						//Rapduch
 						#ifdef SIGMA_TOUCH_SCREEN
-						genie.WriteObject(GENIE_OBJ_FORM,FORM_PRINTING,0);
-						char buffer[13];
-						if (String(card.longFilename).length()>12){
-							for (int i = 0; i<12 ; i++)
-							{
-								buffer[i]=card.longFilename[i];
+							genie.WriteObject(GENIE_OBJ_FORM,FORM_PRINTING,0);
+							char buffer[13];
+							if (String(card.longFilename).length()>12){
+								for (int i = 0; i<12 ; i++)
+								{
+									buffer[i]=card.longFilename[i];
+								}
+								buffer[12]='\0';
+								char* buffer2 = strcat(buffer,"...\0");
+								Serial.print("Card Name: ");
+								Serial.println(card.longFilename);
+								Serial.print("Buffer1: ");
+								Serial.println(buffer);
+								Serial.print("buffer out: ");
+								Serial.println(buffer2);
+								genie.WriteStr(STRINGS_PRINTING_GCODE,buffer2);//Printing form
+							}else{
+								for (int i = 0; i<=String(card.longFilename).length(); i++)
+								{
+									if (buffer[i] == '.') i = String(card.longFilename).length() +10;
+									else buffer[i]=card.longFilename[i];
+								}
+								//buffer[count]='\0';
+								genie.WriteStr(STRINGS_PRINTING_GCODE,buffer);//Printing form//Printing form
 							}
-							buffer[12]='\0';
-							char* buffer2 = strcat(buffer,"...\0");
-							Serial.print("Card Name: ");
-							Serial.println(card.longFilename);
-							Serial.print("Buffer1: ");
-							Serial.println(buffer);
-							Serial.print("buffer out: ");
-							Serial.println(buffer2);
-							genie.WriteStr(STRINGS_PRINTING_GCODE,buffer2);//Printing form
-						}else{
-							for (int i = 0; i<=String(card.longFilename).length(); i++)
-							{
-								if (buffer[i] == '.') i = String(card.longFilename).length() +10;
-								else buffer[i]=card.longFilename[i];
-							}
-							//buffer[count]='\0';
-							genie.WriteStr(STRINGS_PRINTING_GCODE,buffer);//Printing form//Printing form
-						}
 					
-						//Serial.println((char*)prepareString(card.longFilename,12));
-						//genie.WriteStr(6,"Ready");
+							//Serial.println((char*)prepareString(card.longFilename,12));
+							//genie.WriteStr(6,"Ready");
 						#endif
 						break;
 					case 25: //M25 - Pause SD print
@@ -6506,7 +6506,11 @@ void process_commands()
 						if(stepper_inactive_time)  {
 							if( (millis() - previous_millis_cmd) >  stepper_inactive_time )
 							{
-								if(blocks_queued() == false) {
+								if(dobloking){
+									enable_x();
+									enable_y();
+								}
+								else if(blocks_queued() == false) {
 									disable_x();
 									disable_y();
 									disable_z();
@@ -6514,8 +6518,10 @@ void process_commands()
 									disable_e1();
 									disable_e2();
 								}
+								
 							}
 						}
+						
 					
 						#ifdef CHDK //Check if pin should be set to LOW after M240 set it to HIGH
 							if (chdkActive && (millis() - chdkHigh > CHDK_DELAY))
@@ -6563,7 +6569,8 @@ void process_commands()
 						#ifdef TEMP_STAT_LEDS
 							handle_status_leds();
 						#endif
-						check_axes_activity();
+						check_axes_activity();			
+						
 					}
 
 					void kill()
