@@ -359,8 +359,7 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 						Serial.println("RESUME!");						
 						flag_resume = true;
 						if(flag_resume){
-							enquecommand_P(((PSTR("G70"))));
-							st_synchronize();							
+							resume_code();						
 							Serial.println("resume detected");
 						}
 					}

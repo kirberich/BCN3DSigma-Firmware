@@ -26,7 +26,7 @@
 //
 //This is the version declaration for Sigma, v followed by '_' first indicate the hardware, it must have 2 ditgits. Then the '-' and then the firmware, it has to have 3 digits separets by '.'. -> This is useful to
 //get the hw and fw version to Cura-BCN3D and update the new firmware
-#define VERSION_STRING  "01-1.0.2"
+#define VERSION_STRING  "01-1.0.3"
 //#define DEFAULT_QUICK_GUIDE  0;
 // User-specified version info of this build to display in [Pronterface, etc] terminal window during
 // startup. Implementation of an idea by Prof Braino to inform user that any changes made to this
@@ -731,37 +731,37 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 	#endif
 	
 	#if MOTHERBOARD == BCN3D_BOARD
-		#define X_SIGMA_PROBE_OFFSET_FROM_EXTRUDER  18.5//20
+		#define X_SIGMA_PROBE_OFFSET_FROM_EXTRUDER  17//20
 		#define Y_SIGMA_PROBE_OFFSET_FROM_EXTRUDER	24
 		#define Z_SIGMA_PROBE_OFFSET_FROM_EXTRUDER  2.9//2.80//3.4 //It is negative, it is compensated
 	#endif
 	
-	#define X_SIGMA_SECOND_PROBE_OFFSET_FROM_EXTRUDER	-17.5
+	#define X_SIGMA_SECOND_PROBE_OFFSET_FROM_EXTRUDER	-13.5
 	#define Y_SIGMA_SECOND_PROBE_OFFSET_FROM_EXTRUDER	24
 	#define Z_SIGMA_SECOND_PROBE_OFFSET_FROM_EXTRUDER	2.80//2.90
 	
 	//Left extruder probe point
-	#define X_SIGMA_PROBE_1_LEFT_EXTR 61.5
+	#define X_SIGMA_PROBE_1_LEFT_EXTR 59
 	//#define X_SIGMA_PROBE_1_LEFT_EXTR 3
 	#define Y_SIGMA_PROBE_1_LEFT_EXTR 275
 	
-	#define X_SIGMA_PROBE_2_LEFT_EXTR 61.5
+	#define X_SIGMA_PROBE_2_LEFT_EXTR 59
 	//#define X_SIGMA_PROBE_2_LEFT_EXTR 3
 	#define Y_SIGMA_PROBE_2_LEFT_EXTR 10
 	
-	#define X_SIGMA_PROBE_3_LEFT_EXTR 249
+	#define X_SIGMA_PROBE_3_LEFT_EXTR 247.5
 	//#define X_SIGMA_PROBE_3_LEFT_EXTR 204
 	#define Y_SIGMA_PROBE_3_LEFT_EXTR 10
 	
 	//Right extruder probe point
-	#define X_SIGMA_PROBE_1_RIGHT_EXTR 249//254.5
+	#define X_SIGMA_PROBE_1_RIGHT_EXTR 247.5//254.5
 	#define Y_SIGMA_PROBE_1_RIGHT_EXTR 275
 	
-	#define X_SIGMA_PROBE_2_RIGHT_EXTR 249//255
+	#define X_SIGMA_PROBE_2_RIGHT_EXTR 247.5//255
 	//#define X_SIGMA_PROBE_2_RIGHT_EXTR 204
 	#define Y_SIGMA_PROBE_2_RIGHT_EXTR 10
 	
-	#define X_SIGMA_PROBE_3_RIGHT_EXTR 55.5
+	#define X_SIGMA_PROBE_3_RIGHT_EXTR 59
 	//#define X_SIGMA_PROBE_3_RIGHT_EXTR 3
 	#define Y_SIGMA_PROBE_3_RIGHT_EXTR 10
 #endif

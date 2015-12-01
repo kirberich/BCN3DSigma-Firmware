@@ -324,4 +324,5 @@ extern void PID_autotune_Save(float temp, int extruder, int ncycles);
 extern void Config_Reset_Calib();
 extern int	saved_hotend;
 extern bool dobloking;
+extern void resume_code();
 #endif

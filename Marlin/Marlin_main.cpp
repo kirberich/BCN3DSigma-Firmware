@@ -3181,10 +3181,11 @@ void process_commands()
 				
 				//Probe at 3 arbitrary points
 				//probe left extruder
+				dobloking= true;
 				float z2_at_pt_3 = probe_pt(X_SIGMA_PROBE_3_RIGHT_EXTR,Y_SIGMA_PROBE_3_RIGHT_EXTR, Z_RAISE_BEFORE_PROBING);
 				float z2_at_pt_2 = probe_pt(X_SIGMA_PROBE_2_RIGHT_EXTR,Y_SIGMA_PROBE_2_RIGHT_EXTR, current_position[Z_AXIS] + (Z_RAISE_BETWEEN_PROBINGS/2));
 				float z2_at_pt_1 = probe_pt(X_SIGMA_PROBE_1_RIGHT_EXTR,Y_SIGMA_PROBE_1_RIGHT_EXTR, current_position[Z_AXIS] + (Z_RAISE_BETWEEN_PROBINGS/2));
-				
+				dobloking= false;
 				
 				
 				feedrate=homing_feedrate[Z_AXIS];
@@ -3564,56 +3565,8 @@ void process_commands()
 					
 					case 70: //G70 resume
 					Serial.println("G70 ACTIVATED");
+					resume_code();
 					
-					active_extruder = saved_hotend;
-					changeTool(active_extruder);	
-									
-					//*************LOAD TEMPS
-					target_temperature[LEFT_EXTRUDER] = saved_temp[LEFT_EXTRUDER];
-					target_temperature[RIGHT_EXTRUDER] = saved_temp[RIGHT_EXTRUDER];
-					target_temperature_bed = saved_temp[2];
-					//**************************************************************//
-										
-					//********MOVE TO ORIGINAL POSITION Z
-					//if(current_position[Z_AXIS]>=extruder_offset[Z_AXIS]) += 20;
-					current_position[Z_AXIS] = saved_position[Z_AXIS];					
-					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[Z_AXIS], active_extruder);
-					st_synchronize();
-					//*********************************//
-					
-					////*******LOAD ACTUIAL POSITION Y
-					current_position[Y_AXIS] = saved_position[Y_AXIS];
-					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Y_AXIS]/60, active_extruder);
-					st_synchronize();
-					//*********************************//
-					
-					
-					//************HEAT TO SAVED TEMPS					
-					while (degHotend(LEFT_EXTRUDER)<(degTargetHotend(LEFT_EXTRUDER)-5) && degHotend(RIGHT_EXTRUDER)<(degTargetHotend(RIGHT_EXTRUDER)-5) && (degBed()< target_temperature_bed -5)){ //Waiting to heat the extruder
-							
-						manage_heater();
-					}					
-					//*****************************************
-					
-					////******PURGE   -->> Purge to clean the extruder, retrack to avoid the trickle
-					/*current_position[E_AXIS] += 4;
-					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], INSERT_SLOW_SPEED, active_extruder);
-					st_synchronize();	*/
-					//*********************************//
-					
-					//********MOVE TO ORIGINAL POSITION X
-					current_position[X_AXIS] = saved_position[X_AXIS];
-					feedrate=homing_feedrate[X_AXIS];
-					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
-					st_synchronize();
-					//*********************************//
-					
-					//********EXTRACK to keep ready to the new instruction
-					current_position[E_AXIS]+=0; //2
-					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], 50, active_extruder);
-					st_synchronize();
-					//*********************************//
-					flag_resume = false;
 					break;
 
 					case 29: // G29 Detailed Z-Probe, probes the bed at 3 or more points.
@@ -5325,7 +5278,12 @@ void process_commands()
 						float temp = max((float)print_temp_l,(float)print_temp_r);
 						int e=0;
 						int c=8;
+						if(code_seen('S')) temp = code_value();
 						if (code_seen('E')) e = code_value();
+						PID_autotune_Save(temp, e, c);
+						Config_StoreSettings();
+						PID_autotune_Save(temp, e, c);
+						Config_StoreSettings();
 						PID_autotune_Save(temp, e, c);
 						Config_StoreSettings();
 						SERIAL_PROTOCOL(MSG_OK);
@@ -7011,7 +6969,55 @@ void process_commands()
 						genie.WriteObject(GENIE_OBJ_FORM,FORM_RIGHT_Z_TEST,0);
 					}
 					
+					void resume_code(){
+						active_extruder = saved_hotend;
+						changeTool(active_extruder);	
+									
+						//*************LOAD TEMPS
+						target_temperature[LEFT_EXTRUDER] = saved_temp[LEFT_EXTRUDER];
+						target_temperature[RIGHT_EXTRUDER] = saved_temp[RIGHT_EXTRUDER];
+						target_temperature_bed = saved_temp[2];
+						//**************************************************************//
+										
 					
+					
+						////*******LOAD ACTUIAL POSITION Y
+						current_position[Y_AXIS] = saved_position[Y_AXIS];
+						plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Y_AXIS]/60, active_extruder);
+						st_synchronize();
+						//*********************************//
+					
+						//********MOVE TO ORIGINAL POSITION X
+						current_position[X_AXIS] = saved_position[X_AXIS];
+						feedrate=homing_feedrate[X_AXIS];
+						plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
+						st_synchronize();
+						//*********************************//
+					
+					
+						//************HEAT TO SAVED TEMPS					
+						while (degHotend(LEFT_EXTRUDER)<(degTargetHotend(LEFT_EXTRUDER)-5) && degHotend(RIGHT_EXTRUDER)<(degTargetHotend(RIGHT_EXTRUDER)-5) && (degBed()< target_temperature_bed -5)){ //Waiting to heat the extruder
+							
+							manage_heater();
+						}					
+						//*****************************************
+					
+						////******PURGE   -->> Purge to clean the extruder, retrack to avoid the trickle
+						/*current_position[E_AXIS] += 4;
+						plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], INSERT_SLOW_SPEED, active_extruder);
+						st_synchronize();	*/
+						//*********************************//
+					
+						//********MOVE TO ORIGINAL POSITION Z						
+						current_position[Z_AXIS] = saved_position[Z_AXIS];					
+						plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],  current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[Z_AXIS], active_extruder);
+						st_synchronize();
+						//*********************************//
+					
+					
+						
+						flag_resume = false;
+					}
 					
 					void home_axis_from_code(bool x_c, bool y_c, bool z_c)
 					{
