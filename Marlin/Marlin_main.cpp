@@ -3383,6 +3383,7 @@ void process_commands()
 						current_position[Z_AXIS] = 60;
 						plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Z_AXIS]*2/60, LEFT_EXTRUDER);//move bed
 						st_synchronize();
+						dobloking= true;
 						current_position[X_AXIS] = 155; current_position[Y_AXIS] = 0;
 						plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[X_AXIS]/3, LEFT_EXTRUDER);//move first extruder
 						

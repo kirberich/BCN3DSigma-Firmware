@@ -1353,6 +1353,7 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 					genie.WriteStr(STRING_CLEAN_INSTRUCTIONS,"Clean the right nozzle \n and press GO, \n then the Z calibration will start");
 					if (active_extruder == 0)	{	
 						
+						dobloking= false;
 						genie.WriteObject(GENIE_OBJ_FORM,FORM_FULL_CAL,0);
 						genie.WriteStr(STRING_AXIS,"        Z AXIS");
 											
@@ -1381,7 +1382,7 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 					else {
 						genie.WriteObject(GENIE_OBJ_FORM,FORM_FULL_CAL,0);
 						genie.WriteStr(STRING_AXIS,"        Z AXIS");
-						
+						dobloking= false;
 						home_axis_from_code(true,false,false);	
 						
 						enquecommand_P(PSTR("G43"));
@@ -2213,6 +2214,7 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 					current_position[Z_AXIS] = 60;
 					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Z_AXIS]*2/60, RIGHT_EXTRUDER);//move bed
 					st_synchronize();
+					dobloking= true;
 					current_position[X_AXIS] = 155; current_position[Y_AXIS] = 0;
 					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[X_AXIS]/3, RIGHT_EXTRUDER);//move first extruder
 										
@@ -2260,6 +2262,7 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 					current_position[Z_AXIS] = 60;
 					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Z_AXIS]*2/60, RIGHT_EXTRUDER);//move bed
 					st_synchronize();
+					dobloking= true;
 					current_position[X_AXIS] = 155; current_position[Y_AXIS] = 0;
 					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[X_AXIS]/3, RIGHT_EXTRUDER);//move first extruder
 										
@@ -2310,6 +2313,7 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 					current_position[Z_AXIS] = 60;
 					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Z_AXIS]*2/60, RIGHT_EXTRUDER);//move bed
 					st_synchronize();
+					dobloking= true;
 					current_position[X_AXIS] = 155; current_position[Y_AXIS] = 0;
 					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[X_AXIS]/3, RIGHT_EXTRUDER);//move first extruder
 										
@@ -2359,6 +2363,7 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 					current_position[Z_AXIS] = 60;
 					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Z_AXIS]*2/60, RIGHT_EXTRUDER);//move bed
 					st_synchronize();
+					dobloking= true;
 					current_position[X_AXIS] = 155; current_position[Y_AXIS] = 0;
 					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[X_AXIS]/3, RIGHT_EXTRUDER);//move first extruder
 										
@@ -2408,6 +2413,7 @@ void myGenieEventHandler(void) //Handler for the do.Events() function
 					current_position[Z_AXIS] = 60;
 					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Z_AXIS]*2/60, RIGHT_EXTRUDER);//move bed
 					st_synchronize();
+					dobloking= true;
 					current_position[X_AXIS] = 155; current_position[Y_AXIS] = 0;
 					plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[X_AXIS]/3, RIGHT_EXTRUDER);//move first extruder
 										
