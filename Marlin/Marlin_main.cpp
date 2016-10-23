@@ -797,7 +797,7 @@ void setup()
 
 	digitalWrite(RED,HIGH);
 	digitalWrite(GREEN,HIGH);
-	digitalWrite(BLUE,HIGH);
+	analogWrite(BLUE,150);
 
 
 		//enable 24V
