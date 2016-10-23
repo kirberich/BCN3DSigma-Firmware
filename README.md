@@ -1,3 +1,8 @@
+# Purpose of this fork
+I had some consistency issues with the automatic bed leveling, so I turned it off. I also made the printer's LEDs a bit less blue.
+
+That's it. This probably isn't the fork you're looking for.
+
 # BCN3D Sigma Firmware based on Marlin
 
 This is the repository that contains the firmware for the BCN3D Sigma 3D Printer. It's based on the well-known Marlin but with some modifications.
@@ -34,7 +39,7 @@ In order to be more efficient with the feedback, we recommend to follow some gui
 + On the title, indicate the [label](https://github.com/BCN3D/BCN3DSigma-Firmware/labels) of the issue. For example > `[enhancement]: Some changes..`
 
 ## Development
-For advanced users, it's possible to contribute in firmware development. We explain everything in the [wiki][9]. So if you are interested in contributing, folow the instructions [there][9]. 
+For advanced users, it's possible to contribute in firmware development. We explain everything in the [wiki][9]. So if you are interested in contributing, folow the instructions [there][9].
 
 The `master` branch is stable  and it's currently on version `1.1.5`.
 
